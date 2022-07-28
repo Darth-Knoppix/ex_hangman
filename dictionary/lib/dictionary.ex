@@ -1,4 +1,11 @@
 defmodule Dictionary do
+  def word_list do
+    "assets/web2.txt"
+    |> File.read!()
+    |> String.downcase()
+    |> String.split(~R{\n}, trim: true)
+  end
+
   @moduledoc """
   Documentation for `Dictionary`.
   """
@@ -14,8 +21,6 @@ defmodule Dictionary do
 
   """
   def random_word do
-    {:ok, wordlist} = File.read("assets/web2.txt")
-    words = String.split(wordlist)
-    Enum.random(words)
+    word_list() |> Enum.random()
   end
 end
