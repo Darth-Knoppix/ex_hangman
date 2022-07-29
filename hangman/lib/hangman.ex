@@ -3,25 +3,27 @@ defmodule Hangman do
   Documentation for `Hangman`.
   """
 
-  @type game :: any
+  alias Hangman.Impl.Game
+
+  @type state :: :initializing | :won | :lost | :good_guess | :bad_guess | :already_used
+  @opaque game :: Game.t()
   @type tally :: %{
           turns_left: integer(),
-          game_state: any(),
+          game_state: state,
           letters: list(String.t()),
           used: list(String.t())
         }
 
-  @spec new_game :: game
   @doc """
   Create a new game
   """
-  def new_game do
-  end
+  @spec new_game :: game
+  defdelegate new_game, to: Game
 
   @spec make_move(game, String.t()) :: {game, tally}
   @doc """
   Make a move based on the game and guess
   """
-  def make_move(game, guess) do
+  def make_move(_game, _guess) do
   end
 end
