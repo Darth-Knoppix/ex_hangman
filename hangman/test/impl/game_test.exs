@@ -23,4 +23,16 @@ defmodule Hangman.Impl.GameTest do
       assert game.letters == ["s", "a", "l", "a", "m", "a", "n", "d", "e", "r"]
     end
   end
+
+  describe "make move" do
+    test "state doesn't change if game is won or lost" do
+      for state <- [:won, :lost] do
+        game = Game.new_game("cheese")
+        game = Map.put(game, :game_state, state)
+        {new_game, tally} = Game.make_move(game, "x")
+
+        assert new_game == game
+      end
+    end
+  end
 end
