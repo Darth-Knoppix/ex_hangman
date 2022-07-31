@@ -18,6 +18,10 @@ defmodule Hangman.Impl.Game do
   )
 
   def new_game do
-    %__MODULE__{letters: Dictionary.random_word() |> String.codepoints()}
+    new_game(Dictionary.random_word())
+  end
+
+  def new_game(word) do
+    %__MODULE__{letters: word |> String.downcase() |> String.codepoints()}
   end
 end
