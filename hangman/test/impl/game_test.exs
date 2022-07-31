@@ -34,5 +34,24 @@ defmodule Hangman.Impl.GameTest do
         assert new_game == game
       end
     end
+
+    test "duplicate letter is reported" do
+      {game, _tally} = Game.new_game() |> Game.make_move("a")
+      assert game.game_state != :already_used
+
+      {game, _tally} = game |> Game.make_move("a")
+      assert game.game_state == :already_used
+    end
+
+    test "letters are recorded" do
+      game = Game.new_game()
+
+      {game, _tally} = game |> Game.make_move("a")
+      {game, _tally} = game |> Game.make_move("b")
+      {game, _tally} = game |> Game.make_move("c")
+      {game, _tally} = game |> Game.make_move("d")
+
+      assert MapSet.equal?(game.used, MapSet.new(["a", "b", "c", "d"]))
+    end
   end
 end
