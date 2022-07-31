@@ -1,4 +1,4 @@
-defmodule HangmanTest.Impl.Game do
+defmodule Hangman.Impl.GameTest do
   use ExUnit.Case
   alias Hangman.Impl.Game
 
