@@ -29,7 +29,7 @@ defmodule Hangman.Impl.GameTest do
       for state <- [:won, :lost] do
         game = Game.new_game("cheese")
         game = Map.put(game, :game_state, state)
-        {new_game, tally} = Game.make_move(game, "x")
+        {new_game, _tally} = Game.make_move(game, "x")
 
         assert new_game == game
       end
@@ -52,6 +52,48 @@ defmodule Hangman.Impl.GameTest do
       {game, _tally} = game |> Game.make_move("d")
 
       assert MapSet.equal?(game.used, MapSet.new(["a", "b", "c", "d"]))
+    end
+
+    test "recognize a letter in a word" do
+      game = Game.new_game("rice")
+      {game, tally} = Game.make_move(game, "i")
+      assert tally.game_state == :good_guess
+      {game, tally} = Game.make_move(game, "r")
+      assert tally.game_state == :good_guess
+    end
+
+    test "recognize an incorrect guess" do
+      game = Game.new_game("rice")
+      turns_left = game.turns_left
+      {game, tally} = Game.make_move(game, "x")
+      assert tally.game_state == :bad_guess
+      assert tally.turns_left == turns_left - 1
+    end
+
+    test "can handle sequence of moves" do
+      [
+        ["a", :bad_guess, 6, ["_", "_", "_", "_", "_"], ["a"]],
+        ["e", :good_guess, 6, ["_", "e", "_", "_", "_"], ["a", "e"]],
+        ["x", :bad_guess, 5, ["_", "e", "_", "_", "_"], ["a", "e", "x"]],
+        ["l", :good_guess, 5, ["_", "e", "l", "l", "_"], ["a", "e", "l", "x"]],
+        ["h", :good_guess, 5, ["h", "e", "l", "l", "_"], ["a", "e", "h", "l", "x"]]
+      ]
+      |> test_sequence_of_moves()
+    end
+
+    defp test_sequence_of_moves(script) do
+      game = Game.new_game("hello")
+      Enum.reduce(script, game, &check_move/2)
+    end
+
+    defp check_move([guess, state, turns, letters, used], game) do
+      {game, tally} = Game.make_move(game, guess)
+
+      assert tally.game_state == state
+      assert tally.turns_left == turns
+      assert tally.letters == letters
+      assert tally.used == used
+      game
     end
   end
 end

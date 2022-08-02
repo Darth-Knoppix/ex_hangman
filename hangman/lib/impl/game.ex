@@ -35,7 +35,8 @@ defmodule Hangman.Impl.Game do
   end
 
   def make_move(game, guess) do
-    accept_guess(game, guess, MapSet.member?(game.used, guess)) |> with_tally()
+    used = MapSet.member?(game.used, guess)
+    accept_guess(game, guess, used) |> with_tally()
   end
 
   defp accept_guess(game, _guess, _used = true) do
@@ -44,7 +45,34 @@ defmodule Hangman.Impl.Game do
 
   defp accept_guess(game, guess, _used = false) do
     %__MODULE__{game | used: MapSet.put(game.used, guess)}
+    |> score_guess(Enum.member?(game.letters, guess))
   end
+
+  defp score_guess(game, _good_guess = true) do
+    letter_set = MapSet.new(game.letters)
+    new_state = maybe_won(MapSet.subset?(letter_set, game.used))
+
+    %__MODULE__{game | game_state: new_state}
+  end
+
+  defp score_guess(game = %{turns_left: 1}, _bad_guess) do
+    %__MODULE__{game | game_state: :lost}
+  end
+
+  defp score_guess(game, _bad_guess) do
+    %__MODULE__{game | game_state: :bad_guess, turns_left: game.turns_left - 1}
+  end
+
+  defp maybe_won(true), do: :won
+  defp maybe_won(_), do: :good_guess
+
+  defp reveal_guessed_letters(%{letters: letters, used: used}) do
+    letters
+    |> Enum.map(fn letter -> MapSet.member?(used, letter) |> maybe_reveal(letter) end)
+  end
+
+  defp maybe_reveal(true, letter), do: letter
+  defp maybe_reveal(_, _letter), do: "_"
 
   defp with_tally(game) do
     {game, tally(game)}
@@ -55,7 +83,7 @@ defmodule Hangman.Impl.Game do
     %__MODULE__{
       turns_left: game.turns_left,
       game_state: game.game_state,
-      letters: game.letters,
+      letters: reveal_guessed_letters(game),
       used: game.used |> MapSet.to_list() |> Enum.sort()
     }
   end
