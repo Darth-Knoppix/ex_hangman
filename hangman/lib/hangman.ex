@@ -19,4 +19,7 @@ defmodule Hangman do
   Make a move based on the game and guess
   """
   defdelegate make_move(game, guess), to: Game
+
+  @spec tally(game) :: Type.tally()
+  defdelegate tally(game), to: Game
 end
