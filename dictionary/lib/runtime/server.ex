@@ -1,10 +1,11 @@
 defmodule Dictionary.Runtime.Server do
+  use Agent
+  alias Dictionary.Impl.WordList
+
   @name __MODULE__
   @type t :: pid()
 
-  alias Dictionary.Impl.WordList
-
-  def start_link() do
+  def start_link(_args) do
     Agent.start_link(&WordList.word_list/0, name: @name)
   end
 
